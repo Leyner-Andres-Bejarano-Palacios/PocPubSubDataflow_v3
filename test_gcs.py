@@ -82,7 +82,7 @@ class WriteToAvro(PTransform):
       )
 
   def expand(self, pcoll):
-    output = (pcoll | ParDO(ProcessUnboundedRecordsFn(self._sink)))
+    output = (pcoll | ParDo(ProcessUnboundedRecordsFn(self._sink)))
     # p = pcoll.pipeline
     # return pcoll | beam.io.iobase.Write(self._sink)
 
