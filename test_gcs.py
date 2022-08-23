@@ -207,25 +207,11 @@ class GroupMessagesByFixedWindows(PTransform):
             # Bind window info to each element using element timestamp (or publish time).
             | "Window into fixed intervals"
             >> WindowInto(FixedWindows(self.window_size))
-            | "Add timestamp to windowed elements" >> ParDo(AddTimestamp())
             # Assign a random key to each windowed element based on the number of shards.
             | "Add key" >> WithKeys(lambda _: random.randint(0, self.num_shards - 1))
             # Group windowed elements by key. All the elements in the same window must fit
             # memory for this. If not, you need to use `beam.util.BatchElements`.
             | "Group by key" >> GroupByKey()
-        )
-
-class AddTimestamp(DoFn):
-    from datetime import datetime
-    def process(self, element, publish_time=DoFn.TimestampParam):
-        """Processes each windowed element by extracting the message body and its
-        publish time into a tuple.
-        """
-        yield (
-            element.decode("utf-8"),
-            datetime.utcfromtimestamp(float(publish_time)).strftime(
-                "%Y-%m-%d %H:%M:%S.%f"
-            ),
         )
 
 class ExtractJsonFromKeyValuePair(DoFn):
