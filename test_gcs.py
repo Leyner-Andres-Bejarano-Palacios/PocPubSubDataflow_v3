@@ -65,14 +65,9 @@ class AddTimestamp(DoFn):
 
 
 class ExtractJsonFromKeyValuePair(DoFn):
-    def process(self, key_value, window=DoFn.WindowParam):
+    def process(self, key_value):
         """Write messages in a batch to Google Cloud Storage."""
-
-        ts_format = "%H:%M"
-        window_start = window.start.to_utc_datetime().strftime(ts_format)
-        window_end = window.end.to_utc_datetime().strftime(ts_format)
         shard_id, batch = key_value
-        filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
         return [message_body for message_body, publish_time in batch]
 
 
@@ -99,7 +94,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
-            | "Extract Json" >> ExtractJsonFromKeyValuePair()            
+            | "Extract Json" >> ParDo(ExtractJsonFromKeyValuePair())            
             | "Write to GCS" >> WriteToAvro(known_args.output, schema=schema, file_name_suffix='.avro')
         )
 
