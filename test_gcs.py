@@ -18,6 +18,9 @@ from apache_beam.transforms.window import FixedWindows
 from apache_beam.io.fileio import FileSink
 from apache_beam.io.fileio import WriteToFiles
 import fastavro
+from apache_beam.io.fileio import FileSink
+from apache_beam.io.fileio import WriteToFiles
+import fastavro
 
 class AvroFileSink(FileSink):
     def __init__(self, schema, codec='deflate'):
@@ -98,8 +101,6 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
         ],
     })
 
-    sink = AvroFileSink(schema)
-
     # Set `save_main_session` to True so DoFns can access globally imported modules.
     options1 = PipelineOptions(
     pipeline_args,
@@ -123,7 +124,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
             | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())            
-            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, sink=sink,file_naming='.avro' )
+            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, lambda dest: AvroFileSink(schema),file_naming='.avro' )
         )
 
 if __name__ == "__main__":
