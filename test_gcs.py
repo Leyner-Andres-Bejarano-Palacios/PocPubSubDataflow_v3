@@ -19,21 +19,21 @@ from apache_beam.io.fileio import FileSink
 from apache_beam.io.fileio import WriteToFiles
 import fastavro
 
-    class AvroFileSink(FileSink):
-        def __init__(self, schema, codec='deflate'):
-            self._schema = schema
-            self._codec = codec
+class AvroFileSink(FileSink):
+    def __init__(self, schema, codec='deflate'):
+        self._schema = schema
+        self._codec = codec
 
-        def open(self, fh):
-            # This is called on every new bundle.
-            self.writer = fastavro.write.Writer(fh, self._schema, self._codec)
+    def open(self, fh):
+        # This is called on every new bundle.
+        self.writer = fastavro.write.Writer(fh, self._schema, self._codec)
 
-        def write(self, record):
-            # This is called on every element.
-            self.writer.write(record)
+    def write(self, record):
+        # This is called on every element.
+        self.writer.write(record)
 
-        def flush(self):
-            self.writer.flush()
+    def flush(self):
+        self.writer.flush()
 
 
 
