@@ -4,6 +4,7 @@ import logging
 import random
 import os
 import apache_beam as beam
+from functions.executor import Executor
 from apache_beam.io import WriteToAvro
 from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -62,16 +63,9 @@ class AddTimestamp(DoFn):
             ),
         )
 
+
+
 class ExtractJsonFromKeyValuePair(DoFn):
-    def process(self, key_value):
-        """Extract json from keyValue Pair generated in wwindows function."""
-        shard_id, batch = key_value
-        return [message_body for  message_body, publish_time in batch]
-
-class WriteToGCS(DoFn):
-    def __init__(self, output_path):
-        self.output_path = output_path
-
     def process(self, key_value, window=DoFn.WindowParam):
         """Write messages in a batch to Google Cloud Storage."""
 
@@ -80,12 +74,8 @@ class WriteToGCS(DoFn):
         window_end = window.end.to_utc_datetime().strftime(ts_format)
         shard_id, batch = key_value
         filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
+        return [message_body for message_body, publish_time in batch]
 
-        with io.gcsio.GcsIO().open(filename=filename, mode="w") as f:
-            for message_body, publish_time in batch:
-                f.write(f"{message_body}\n".encode("utf-8"))
-                #json.dump(message_body, f, ensure_ascii=False)
-                #f.write(json.dumps({"test":message_body.encode("utf-8")}, ensure_ascii=False))
 
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     # Set `save_main_session` to True so DoFns can access globally imported modules.

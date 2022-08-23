@@ -7,6 +7,7 @@ from random import random
 from google.auth import jwt
 from google.cloud import pubsub_v1
 
+
 # --- Base variables and auth path
 CREDENTIALS_PATH =r"x-oxygen-360101-04c0c83102ea.json"
 PROJECT_ID = "x-oxygen-360101"
