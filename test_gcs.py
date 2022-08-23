@@ -20,21 +20,7 @@ from apache_beam.io.fileio import WriteToFiles
 import fastavro
 
 
-class AvroFileSink(FileSink):
-    def __init__(self, schema, codec='deflate'):
-        self._schema = schema
-        self._codec = codec
 
-    def open(self, fh):
-        # This is called on every new bundle.
-        self.writer = fastavro.write.Writer(fh, self._schema, self._codec)
-
-    def write(self, record):
-        # This is called on every element.
-        self.writer.write(record)
-
-    def flush(self):
-        self.writer.flush()
 
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"x-oxygen-360101-a0fc362da30c.json"
@@ -97,6 +83,21 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             {"name": "msg", "type": "string"}
         ],
     })
+    class AvroFileSink(FileSink):
+        def __init__(self, schema, codec='deflate'):
+            self._schema = schema
+            self._codec = codec
+
+        def open(self, fh):
+            # This is called on every new bundle.
+            self.writer = fastavro.write.Writer(fh, self._schema, self._codec)
+
+        def write(self, record):
+            # This is called on every element.
+            self.writer.write(record)
+
+        def flush(self):
+            self.writer.flush()
     sink = AvroFileSink(schema=schema)
 
     # Set `save_main_session` to True so DoFns can access globally imported modules.
@@ -104,7 +105,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     pipeline_args,
     runner='DataflowRunner',
     project='x-oxygen-360101',
-    job_name='test-yohan-seb-12',
+    job_name='test-yohan-seb-13',
     temp_location='gs://temp-medium1/temp1',
     region='us-east1',
     service_account_email='684034867805-compute@developer.gserviceaccount.com',
