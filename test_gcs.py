@@ -81,34 +81,7 @@ class AddTimestamp(DoFn):
             ),
         )
 
-class WriteToGCS(DoFn):
-    def __init__(self, output_path,schema):
-        self.output_path = output_path
-        self.schema = parse_schema(raw_schema = {
-        "type": "record",
-        "namespace": "AvroPubSubDemo",
-        "name": "Entity",
-        "fields": [
-            {"name": "id", "type": "string"},
-            {"name": "name", "type": "string"},
-            {"name": "dob", "type": "string"},
-        ],
-    })
 
-    def process(self, key_value, window=DoFn.WindowParam):
-        """Write messages in a batch to Google Cloud Storage."""
-
-        ts_format = "%H:%M"
-        window_start = window.start.to_utc_datetime().strftime(ts_format)
-        window_end = window.end.to_utc_datetime().strftime(ts_format)
-        shard_id, batch = key_value
-        filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
-
-        with io.gcsio.GcsIO().open(filename=filename, mode="w") as f:
-            for message_body, publish_time in batch:
-                f.write(f"{message_body},{publish_time}\n".encode("utf-8"))
-                #json.dump(message_body, f, ensure_ascii=False)
-                #f.write(json.dumps({"test":message_body.encode("utf-8")}, ensure_ascii=False))
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     schema = fastavro.schema.parse_schema({
         "type": "record",
