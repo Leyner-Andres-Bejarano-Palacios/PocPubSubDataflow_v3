@@ -46,7 +46,10 @@ class AddTimestamp(DoFn):
         publish time into a tuple.
         """
         yield (
-            element.decode("utf-8").replace("bananas", datetime.utcfromtimestamp(float(publish_time)).strftime("%Y-%m-%d %H:%M:%S.%f")),
+            element.decode("utf-8"),
+            datetime.utcfromtimestamp(float(publish_time)).strftime(
+                "%Y-%m-%d %H:%M:%S.%f"
+            ),
         )
 
 class WriteToGCS(DoFn):
@@ -60,11 +63,11 @@ class WriteToGCS(DoFn):
         window_start = window.start.to_utc_datetime().strftime(ts_format)
         window_end = window.end.to_utc_datetime().strftime(ts_format)
         shard_id, batch = key_value
-        filename = "zz1-".join([self.output_path, window_start, window_end, str(shard_id)])
+        filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
 
         with io.gcsio.GcsIO().open(filename=filename, mode="w") as f:
             for message_body, publish_time in batch:
-                f.write(f"{message_body},{publish_time}\n".encode("utf-8"))
+                f.write(f"{message_body}\n".encode("utf-8"))
                 #json.dump(message_body, f, ensure_ascii=False)
                 #f.write(json.dumps({"test":message_body.encode("utf-8")}, ensure_ascii=False))
 
