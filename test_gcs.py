@@ -14,6 +14,8 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"x-oxygen-360101-a0fc362da30c.js
 BIGQUERY_TABLE = "x-oxygen-360101:medium.medium_test"
 BIGQUERY_SCHEMA = "timestamp:TIMESTAMP,attr1:FLOAT,msg:STRING"
 
+
+
 class GroupMessagesByFixedWindows(PTransform):
     """A composite transform that groups Pub/Sub messages based on publish time
     and outputs a list of tuples, each containing a message and its publish time.
@@ -44,10 +46,7 @@ class AddTimestamp(DoFn):
         publish time into a tuple.
         """
         yield (
-            element.decode("utf-8"),
-            datetime.utcfromtimestamp(float(publish_time)).strftime(
-                "%Y-%m-%d %H:%M:%S.%f"
-            ),
+            element.decode("utf-8").replace("bananas", datetime.utcfromtimestamp(float(publish_time)).strftime("%Y-%m-%d %H:%M:%S.%f")),
         )
 
 class WriteToGCS(DoFn):
@@ -61,13 +60,14 @@ class WriteToGCS(DoFn):
         window_start = window.start.to_utc_datetime().strftime(ts_format)
         window_end = window.end.to_utc_datetime().strftime(ts_format)
         shard_id, batch = key_value
-        filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
+        filename = "zz1-".join([self.output_path, window_start, window_end, str(shard_id)])
 
         with io.gcsio.GcsIO().open(filename=filename, mode="w") as f:
             for message_body, publish_time in batch:
                 f.write(f"{message_body},{publish_time}\n".encode("utf-8"))
                 #json.dump(message_body, f, ensure_ascii=False)
                 #f.write(json.dumps({"test":message_body.encode("utf-8")}, ensure_ascii=False))
+
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     # Set `save_main_session` to True so DoFns can access globally imported modules.
     options1 = PipelineOptions(
