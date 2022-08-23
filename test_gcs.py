@@ -81,6 +81,11 @@ class AddTimestamp(DoFn):
             ),
         )
 
+class ExtractJsonFromKeyValuePair(DoFn):
+    def process(self, key_value):
+        """Extract json from keyValue Pair generated in wwindows function."""
+        shard_id, batch = key_value
+        return [message_body for  message_body, publish_time in batch]
 
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     schema = fastavro.schema.parse_schema({
@@ -116,7 +121,8 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
-            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, sink=sink)
+            | "Window into" >> ParDo(ExtractJsonFromKeyValuePair())            
+            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, sink=sink,file_naming='.avro' )
         )
 
 if __name__ == "__main__":
