@@ -69,6 +69,8 @@ class ExtractJsonFromKeyValuePair(DoFn):
         """Write messages in a batch to Google Cloud Storage."""
 
         ts_format = "%H:%M"
+        window_start = window.start.to_utc_datetime().strftime(ts_format)
+        window_end = window.end.to_utc_datetime().strftime(ts_format)        
         shard_id, batch = key_value
         filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
         return [message_body for message_body, publish_time in batch]
