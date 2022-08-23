@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import random
 import os
+import sys
 import avro
 from avro import io as avroio
 from avro import datafile
@@ -22,6 +23,8 @@ from apache_beam.io.fileio import WriteToFiles
 import fastavro
 
 
+def _use_fastavro():
+  return sys.version_info[0] >= 3
 
 class WriteToAvro(PTransform):
   """A ``PTransform`` for writing avro files."""
