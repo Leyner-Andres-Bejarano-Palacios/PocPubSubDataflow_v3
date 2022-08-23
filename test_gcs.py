@@ -124,7 +124,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
             | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())            
-            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, lambda dest: AvroFileSink(schema),file_naming='.avro' )
+            | "Write to GCS" >> WriteToFiles(path=known_args.output_path, lambda dest: AvroFileSink(schema))
         )
 
 if __name__ == "__main__":
