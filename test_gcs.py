@@ -4,7 +4,6 @@ import logging
 import random
 import os
 import apache_beam as beam
-from functions.executor import Executor
 from apache_beam.io import WriteToAvro
 from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
 from apache_beam.options.pipeline_options import PipelineOptions
