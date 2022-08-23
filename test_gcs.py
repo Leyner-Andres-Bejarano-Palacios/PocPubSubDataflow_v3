@@ -121,7 +121,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
-            | "Window into" >> ParDo(ExtractJsonFromKeyValuePair())            
+            | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())            
             | "Write to GCS" >> WriteToFiles(path=known_args.output_path, sink=sink,file_naming='.avro' )
         )
 
