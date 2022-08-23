@@ -4,9 +4,11 @@ import logging
 import random
 import os
 import apache_beam as beam
+from apache_beam.io import WriteToAvro
 from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.transforms.window import FixedWindows
+from fastavro import parse_schema, schemaless_reader, schemaless_writer
 
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"x-oxygen-360101-a0fc362da30c.json"
@@ -14,7 +16,15 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"x-oxygen-360101-a0fc362da30c.js
 BIGQUERY_TABLE = "x-oxygen-360101:medium.medium_test"
 BIGQUERY_SCHEMA = "timestamp:TIMESTAMP,attr1:FLOAT,msg:STRING"
 
-
+raw_schema = {
+        "type": "record",
+        "namespace": "AvroPubSubDemo",
+        "name": "Entity",
+        "fields": [
+            {"name": "attr1", "type": "float"},
+            {"name": "msg", "type": "string"}
+        ],
+    }
 
 class GroupMessagesByFixedWindows(PTransform):
     """A composite transform that groups Pub/Sub messages based on publish time
@@ -51,6 +61,12 @@ class AddTimestamp(DoFn):
                 "%Y-%m-%d %H:%M:%S.%f"
             ),
         )
+
+class ExtractJsonFromKeyValuePair(DoFn):
+    def process(self, key_value):
+        """Extract json from keyValue Pair generated in wwindows function."""
+        shard_id, batch = key_value
+        return [message_body for  message_body, publish_time in batch]
 
 class WriteToGCS(DoFn):
     def __init__(self, output_path):
@@ -94,12 +110,13 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
-            | "Write to GCS" >> ParDo(WriteToGCS(output_path))
+            | "Extract Json" >> ExtractJsonFromKeyValuePair()            
+            | "Write to GCS" >> WriteToAvro(known_args.output, schema=schema, file_name_suffix='.avro')
         )
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-
+    schema = parse_schema(raw_schema)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--input_subscription",
