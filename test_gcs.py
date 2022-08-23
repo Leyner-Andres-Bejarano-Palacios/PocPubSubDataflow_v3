@@ -216,6 +216,7 @@ class GroupMessagesByFixedWindows(PTransform):
         )
 
 class AddTimestamp(DoFn):
+    from datetime import datetime
     def process(self, element, publish_time=DoFn.TimestampParam):
         """Processes each windowed element by extracting the message body and its
         publish time into a tuple.
