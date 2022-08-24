@@ -1,7 +1,7 @@
 # source ----> https://towardsdatascience.com/data-pipelines-with-apache-beam-86cd8eb55fd8
 
 
-
+import logging
 import fastavro
 import argparse
 import avro.schema
