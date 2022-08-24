@@ -93,13 +93,13 @@ class ExtractJsonFromKeyValuePair(DoFn):
 
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     schema = fastavro.schema.parse_schema({
-        "type": "record",
-        "namespace": "AvroPubSubDemo",
-        "name": "Entity",
-        "fields": [
-            {"name": "attr1", "type": "float"},
-            {"name": "msg", "type": "string"}
-        ],
+    "type": "record",
+    "namespace": "AvroPubSubDemo",
+    "name": "Entity",
+    "fields": [
+        {"name": "attr1", "type": ["float", "null"]},
+        {"name": "msg", "type": ["string","null"]}
+    ],
     })
 
     # Set `save_main_session` to True so DoFns can access globally imported modules.
@@ -125,7 +125,8 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
             | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
             | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())
-            | "write avros" >> OverridenClass(known_args.output_path, schema=schema)          
+            |  beam.Map(lambda element: element)
+            | "write avros" >> OverridenClass('gs://test-carga1/test/output.avro', schema=schema)          
 
         )
 
