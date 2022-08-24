@@ -32,12 +32,12 @@ class OverridenClass(WriteToAvro):
 class ProcessUnboundedRecordsFn(beam.DoFn):
     def __init__(self,sink):
         self._sink = sink    
-    def process(self, key_value, window=DoFn.WindowParam):
+    def process(self, record, window=DoFn.WindowParam):
         # ts_format = "%H:%M"
         # window_start = window.start.to_utc_datetime().strftime(ts_format)
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
         # filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
-        beam.io.iobase.Write(self._sink,key_value)
+        self._sink.write(record)
 
     
 
@@ -128,7 +128,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
         )
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
