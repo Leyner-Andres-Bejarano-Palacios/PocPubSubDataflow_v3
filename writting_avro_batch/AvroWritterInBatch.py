@@ -24,8 +24,8 @@ if __name__ == "__main__":
     "namespace": "AvroPubSubDemo",
     "name": "Entity",
     "fields": [
-        {"name": "attr1", "type": "float"},
-        {"name": "msg", "type": "string"}
+        {"name": "attr1", "type": ["float", "null"]},
+        {"name": "msg", "type": ["string","null"]}
     ],
     })
     options1 = PipelineOptions(
