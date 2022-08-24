@@ -2,7 +2,7 @@
 
 
 
-
+import fastavro
 import argparse
 import avro.schema
 import apache_beam as beam
