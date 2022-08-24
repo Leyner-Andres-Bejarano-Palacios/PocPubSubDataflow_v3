@@ -33,6 +33,7 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
     def __init__(self,sink):
         self._sink = sink    
     def process(self, record, window=DoFn.WindowParam):
+        import apache_beam as beam
         # ts_format = "%H:%M"
         # window_start = window.start.to_utc_datetime().strftime(ts_format)
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
@@ -78,6 +79,7 @@ class AddTimestamp(DoFn):
         """Processes each windowed element by extracting the message body and its
         publish time into a tuple.
         """
+        from datetime import datetime
         yield (
             element.decode("utf-8"),
             datetime.utcfromtimestamp(float(publish_time)).strftime(
