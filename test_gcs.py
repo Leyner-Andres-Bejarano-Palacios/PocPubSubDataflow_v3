@@ -38,7 +38,7 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
         # shard_id, batch = key_value
         # filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
-        beam.io.iobase.Write(self._sink)
+        return beam.io.iobase.Write(self._sink)
     
 
 
