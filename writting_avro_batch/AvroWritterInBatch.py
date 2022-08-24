@@ -10,6 +10,7 @@ from apache_beam.io import WriteToAvro
 from apache_beam.io import ReadFromAvro
 from avro.io import DatumReader, DatumWriter
 from avro.datafile import DataFileReader, DataFileWriter
+from apache_beam.options.pipeline_options import PipelineOptions
  
 
  
