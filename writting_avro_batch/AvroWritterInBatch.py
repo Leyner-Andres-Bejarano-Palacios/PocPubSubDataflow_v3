@@ -1,11 +1,15 @@
 # source ----> https://towardsdatascience.com/data-pipelines-with-apache-beam-86cd8eb55fd8
-import apache_beam as beam
+
+
+
+
+import argparse
 import avro.schema
-from avro.datafile import DataFileReader, DataFileWriter
-from avro.io import DatumReader, DatumWriter
- 
-from apache_beam.io import ReadFromAvro
+import apache_beam as beam
 from apache_beam.io import WriteToAvro
+from apache_beam.io import ReadFromAvro
+from avro.io import DatumReader, DatumWriter
+from avro.datafile import DataFileReader, DataFileWriter
  
 
  
