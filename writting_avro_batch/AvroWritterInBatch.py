@@ -41,7 +41,10 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
     avro_write = beam.Pipeline(options=options1)
     content_4 = ( avro_write
-    |beam.Create({'attr1': 2.2153305989805246, 'msg': 'Hi-2022-08-22 19:44:54.495819'})
+    |beam.Create([{'attr1': 2.2153305989805246, 'msg': 'Hi-2022-08-22 19:44:54.495819'},
+                  {'attr1': 2.2153305989805246, 'msg': 'Hi-2022-08-22 19:44:54.495819'},
+                  {'attr1': 2.2153305989805246, 'msg': 'Hi-2022-08-22 19:44:54.495819'},
+                  {'attr1': 2.2153305989805246, 'msg': 'Hi-2022-08-22 19:44:54.495819'}])
     |beam.Map(lambda element: element)
     |beam.io.WriteToAvro('gs://test-carga1/test/output.avro',schema=schema))
 
