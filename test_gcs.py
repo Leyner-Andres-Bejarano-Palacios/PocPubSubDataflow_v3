@@ -36,9 +36,9 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
         # ts_format = "%H:%M"
         # window_start = window.start.to_utc_datetime().strftime(ts_format)
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
-        # shard_id, batch = key_value
         # filename = "-".join([self.output_path, window_start, window_end, str(shard_id)])
-        return beam.io.iobase.Write(self._sink)
+        beam.io.iobase.Write(self._sink,key_value)
+
     
 
 
@@ -111,10 +111,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     temp_location='gs://temp-medium1/temp1',
     region='us-east1',
     service_account_email='684034867805-compute@developer.gserviceaccount.com',
-    streaming = True,
-    save_main_session= True,
-    )
-
+    streaming = True, beam.Map(lambda element: element)
     with Pipeline(options=options1) as pipeline:
         (
             pipeline
