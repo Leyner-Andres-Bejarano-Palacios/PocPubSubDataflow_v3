@@ -33,7 +33,30 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
     def __init__(self,sink):
         self._sink = sink    
     def process(self, record, window=DoFn.WindowParam):
+        import argparse
+        from datetime import datetime
+        import logging
+        import random
+        import os
+        import sys
+        import avro
+        from avro import io as avroio
+        from avro import datafile
+        from avro import schema
         import apache_beam as beam
+        from apache_beam.io import filebasedsink
+        from fastavro import parse_schema
+        from apache_beam.io.filesystem import CompressionTypes
+        from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+        from apache_beam.options.pipeline_options import PipelineOptions
+        from apache_beam.transforms.window import FixedWindows
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io import WriteToAvro
         # ts_format = "%H:%M"
         # window_start = window.start.to_utc_datetime().strftime(ts_format)
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
@@ -61,6 +84,30 @@ class GroupMessagesByFixedWindows(PTransform):
         self.num_shards = num_shards
 
     def expand(self, pcoll):
+        import argparse
+        from datetime import datetime
+        import logging
+        import random
+        import os
+        import sys
+        import avro
+        from avro import io as avroio
+        from avro import datafile
+        from avro import schema
+        import apache_beam as beam
+        from apache_beam.io import filebasedsink
+        from fastavro import parse_schema
+        from apache_beam.io.filesystem import CompressionTypes
+        from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+        from apache_beam.options.pipeline_options import PipelineOptions
+        from apache_beam.transforms.window import FixedWindows
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io import WriteToAvro
         return (
             pcoll
             # Bind window info to each element using element timestamp (or publish time).
@@ -79,7 +126,30 @@ class AddTimestamp(DoFn):
         """Processes each windowed element by extracting the message body and its
         publish time into a tuple.
         """
+        import argparse
         from datetime import datetime
+        import logging
+        import random
+        import os
+        import sys
+        import avro
+        from avro import io as avroio
+        from avro import datafile
+        from avro import schema
+        import apache_beam as beam
+        from apache_beam.io import filebasedsink
+        from fastavro import parse_schema
+        from apache_beam.io.filesystem import CompressionTypes
+        from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+        from apache_beam.options.pipeline_options import PipelineOptions
+        from apache_beam.transforms.window import FixedWindows
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io import WriteToAvro
         yield (
             element.decode("utf-8"),
             datetime.utcfromtimestamp(float(publish_time)).strftime(
@@ -90,10 +160,58 @@ class AddTimestamp(DoFn):
 class ExtractJsonFromKeyValuePair(DoFn):
     def process(self, key_value, window=DoFn.WindowParam):
         """Extract json from keyValue Pair generated in wwindows function."""
+        import argparse
+        from datetime import datetime
+        import logging
+        import random
+        import os
+        import sys
+        import avro
+        from avro import io as avroio
+        from avro import datafile
+        from avro import schema
+        import apache_beam as beam
+        from apache_beam.io import filebasedsink
+        from fastavro import parse_schema
+        from apache_beam.io.filesystem import CompressionTypes
+        from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+        from apache_beam.options.pipeline_options import PipelineOptions
+        from apache_beam.transforms.window import FixedWindows
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io import WriteToAvro
         shard_id, batch = key_value
         return [message_body for  message_body, publish_time in batch]
 
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
+    import argparse
+    from datetime import datetime
+    import logging
+    import random
+    import os
+    import sys
+    import avro
+    from avro import io as avroio
+    from avro import datafile
+    from avro import schema
+    import apache_beam as beam
+    from apache_beam.io import filebasedsink
+    from fastavro import parse_schema
+    from apache_beam.io.filesystem import CompressionTypes
+    from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+    from apache_beam.options.pipeline_options import PipelineOptions
+    from apache_beam.transforms.window import FixedWindows
+    from apache_beam.io.fileio import FileSink
+    from apache_beam.io.fileio import WriteToFiles
+    import fastavro
+    from apache_beam.io.fileio import FileSink
+    from apache_beam.io.fileio import WriteToFiles
+    import fastavro
+    from apache_beam.io import WriteToAvro
     schema = fastavro.schema.parse_schema({
     "type": "record",
     "namespace": "AvroPubSubDemo",
