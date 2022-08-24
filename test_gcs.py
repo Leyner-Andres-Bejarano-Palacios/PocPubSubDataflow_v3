@@ -111,7 +111,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     temp_location='gs://temp-medium1/temp1',
     region='us-east1',
     service_account_email='684034867805-compute@developer.gserviceaccount.com',
-    streaming = True, beam.Map(lambda element: element)
+    streaming = True)
     with Pipeline(options=options1) as pipeline:
         (
             pipeline
