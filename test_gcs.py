@@ -259,7 +259,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             # | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
             | "Fixed-size windows" >> beam.WindowInto(window.FixedWindows(window_interval_sec, 0))
             | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())
-            |  beam.ParDo(fn_divide_clean_dirty()).with_outputs())
+            |  beam.ParDo(fn_divide_clean_dirty()).with_outputs()
         )
 
     bq_write = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
