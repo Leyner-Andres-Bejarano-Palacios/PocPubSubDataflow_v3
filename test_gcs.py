@@ -57,7 +57,7 @@ class fn_check_schema(beam.DoFn):
         import apache_beam.transforms.window as window
         parsed = json.loads(element.decode("utf-8"))
         correct = False
-        if "attr1" in parsed and \
+        if "attr40" in parsed and \
            "msg" in parsed:
             correct = True
 
