@@ -254,28 +254,28 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     region='us-east1',
     service_account_email='684034867805-compute@developer.gserviceaccount.com',
     streaming = True)
-    p = beam.Pipeline(options=options1)
-    results  = (
-            p
-            # Because `timestamp_attribute` is unspecified in `ReadFromPubSub`, Beam
-            # binds the publish time returned by the Pub/Sub server for each message
-            # to the element's timestamp parameter, accessible via `DoFn.TimestampParam`.
-            # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
-            | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
-            # | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
-            | "Fixed-size windows" >> beam.WindowInto(window.FixedWindows(window_interval_sec, 0))
-            | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())
-            |  beam.ParDo(fn_check_schema()).with_outputs()
-        )
+    with Pipeline(options=options1) as pipeline:    
+        results  = (
+                pipeline
+                # Because `timestamp_attribute` is unspecified in `ReadFromPubSub`, Beam
+                # binds the publish time returned by the Pub/Sub server for each message
+                # to the element's timestamp parameter, accessible via `DoFn.TimestampParam`.
+                # https://beam.apache.org/releases/pydoc/current/apache_beam.io.gcp.pubsub.html#apache_beam.io.gcp.pubsub.ReadFromPubSub
+                | "Read from Pub/Sub" >> io.ReadFromPubSub(subscription=input_subscription)
+                # | "Window into" >> GroupMessagesByFixedWindows(window_size, num_shards)
+                | "Fixed-size windows" >> beam.WindowInto(window.FixedWindows(window_interval_sec, 0))
+                | "Extract json from key value pair" >> ParDo(ExtractJsonFromKeyValuePair())
+                |  beam.ParDo(fn_check_schema()).with_outputs()
+            )
 
-    bq_write = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
-        BIGQUERY_TABLE,
-        #table_FALABELLA,
-        schema=BIGQUERY_SCHEMA,
-        write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
-        #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
-        #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-    )        
+        bq_write = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
+            BIGQUERY_TABLE,
+            #table_FALABELLA,
+            schema=BIGQUERY_SCHEMA,
+            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+            #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
+            #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
+        )        
 
     
 
