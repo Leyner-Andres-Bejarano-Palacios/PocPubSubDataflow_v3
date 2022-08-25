@@ -29,6 +29,32 @@ BIGQUERY_SCHEMA = "attr1:FLOAT,msg:STRING"
 
 class fn_check_schema(beam.DoFn):
     def process(self, element):
+        import argparse
+        from datetime import datetime
+        import logging
+        import random
+        import os
+        import sys
+        import avro
+        from avro import io as avroio
+        from avro import datafile
+        from avro import schema
+        import apache_beam as beam
+        from apache_beam import pvalue
+        from apache_beam.io import filebasedsink
+        from fastavro import parse_schema
+        from apache_beam.io.filesystem import CompressionTypes
+        from apache_beam import DoFn, GroupByKey, io, ParDo, Pipeline, PTransform, WindowInto, WithKeys
+        from apache_beam.options.pipeline_options import PipelineOptions
+        from apache_beam.transforms.window import FixedWindows
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io.fileio import FileSink
+        from apache_beam.io.fileio import WriteToFiles
+        import fastavro
+        from apache_beam.io import WriteToAvro
+        import apache_beam.transforms.window as window
         parsed = json.loads(element.decode("utf-8"))
         correct = False
         if "attr1" in parsed and \
