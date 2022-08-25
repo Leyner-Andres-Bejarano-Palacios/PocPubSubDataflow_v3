@@ -28,15 +28,16 @@ BIGQUERY_SCHEMA = "attr1:FLOAT,msg:STRING"
 
 class fn_check_schema(beam.DoFn):
     def process(self, element):
+        parsed = json.loads(element.decode("utf-8"))
         correct = False
-        if "attr1" in element and \
-           "msg" in element:
+        if "attr1" in parsed and \
+           "msg" in parsed:
             correct = True
 
         if correct == True:
-            yield pvalue.TaggedOutput('Clean', element)
+            yield pvalue.TaggedOutput('Clean', parsed)
         else:
-            yield pvalue.TaggedOutput('validationsDetected', element)
+            yield pvalue.TaggedOutput('validationsDetected', parsed)
 
 
 
