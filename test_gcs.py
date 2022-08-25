@@ -22,6 +22,7 @@ from apache_beam.io.fileio import FileSink
 from apache_beam.io.fileio import WriteToFiles
 import fastavro
 from apache_beam.io import WriteToAvro
+import apache_beam.transforms.window as window
 
 BIGQUERY_SCHEMA = "attr1:FLOAT,msg:STRING"
 
@@ -73,6 +74,7 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
         from apache_beam.io.fileio import WriteToFiles
         import fastavro
         from apache_beam.io import WriteToAvro
+        import apache_beam.transforms.window as window
         # ts_format = "%H:%M"
         # window_start = window.start.to_utc_datetime().strftime(ts_format)
         # window_end = window.end.to_utc_datetime().strftime(ts_format)
@@ -124,6 +126,7 @@ class GroupMessagesByFixedWindows(PTransform):
         from apache_beam.io.fileio import WriteToFiles
         import fastavro
         from apache_beam.io import WriteToAvro
+        import apache_beam.transforms.window as window
         return (
             pcoll
             # Bind window info to each element using element timestamp (or publish time).
@@ -166,6 +169,7 @@ class AddTimestamp(DoFn):
         from apache_beam.io.fileio import WriteToFiles
         import fastavro
         from apache_beam.io import WriteToAvro
+        import apache_beam.transforms.window as window
         yield (
             element.decode("utf-8"),
             datetime.utcfromtimestamp(float(publish_time)).strftime(
@@ -200,6 +204,7 @@ class ExtractJsonFromKeyValuePair(DoFn):
         from apache_beam.io.fileio import WriteToFiles
         import fastavro
         from apache_beam.io import WriteToAvro
+        import apache_beam.transforms.window as window
         shard_id, batch = key_value
         return [message_body for  message_body, publish_time in batch]
 
@@ -228,6 +233,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     from apache_beam.io.fileio import WriteToFiles
     import fastavro
     from apache_beam.io import WriteToAvro
+    import apache_beam.transforms.window as window
     schema = fastavro.schema.parse_schema({
     "type": "record",
     "namespace": "AvroPubSubDemo",
