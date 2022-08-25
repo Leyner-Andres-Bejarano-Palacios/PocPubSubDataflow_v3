@@ -9,6 +9,7 @@ from avro import io as avroio
 from avro import datafile
 from avro import schema
 import apache_beam as beam
+from apache_beam import pvalue
 from apache_beam.io import filebasedsink
 from fastavro import parse_schema
 from apache_beam.io.filesystem import CompressionTypes
@@ -61,6 +62,7 @@ class ProcessUnboundedRecordsFn(beam.DoFn):
         from avro import io as avroio
         from avro import datafile
         from avro import schema
+        from apache_beam import pvalue
         import apache_beam as beam
         from apache_beam.io import filebasedsink
         from fastavro import parse_schema
@@ -111,6 +113,7 @@ class GroupMessagesByFixedWindows(PTransform):
         import sys
         import avro
         from avro import io as avroio
+        from apache_beam import pvalue
         from avro import datafile
         from avro import schema
         import apache_beam as beam
@@ -154,6 +157,7 @@ class AddTimestamp(DoFn):
         import sys
         import avro
         from avro import io as avroio
+        from apache_beam import pvalue
         from avro import datafile
         from avro import schema
         import apache_beam as beam
@@ -189,6 +193,7 @@ class ExtractJsonFromKeyValuePair(DoFn):
         import sys
         import avro
         from avro import io as avroio
+        from apache_beam import pvalue
         from avro import datafile
         from avro import schema
         import apache_beam as beam
@@ -218,6 +223,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     import sys
     import avro
     from avro import io as avroio
+    from apache_beam import pvalue
     from avro import datafile
     from avro import schema
     import apache_beam as beam
