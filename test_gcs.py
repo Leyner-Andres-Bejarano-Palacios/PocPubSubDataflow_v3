@@ -250,7 +250,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
     streaming = True)
     p = beam.Pipeline(options=options1)
     results  = (
-            pipeline
+            p
             # Because `timestamp_attribute` is unspecified in `ReadFromPubSub`, Beam
             # binds the publish time returned by the Pub/Sub server for each message
             # to the element's timestamp parameter, accessible via `DoFn.TimestampParam`.
