@@ -248,6 +248,13 @@ class ExtractJsonFromKeyValuePair(DoFn):
         shard_id, batch = key_value
         return [message_body for  message_body, publish_time in batch]
 
+class FormatErrors(DoFn):
+    def process(self, record, window=DoFn.WindowParam):
+        """Format errors from bigQuery insert."""
+        return Map(lambda record: {'value':{'attr1':str(record['attr1']),'msg':str(record['msg'])},\
+                                'error':str(record['FailedRows']),\
+                                'timestamp':str(record['timestamp'])})
+
 def run(input_subscription, output_path, output_table, window_interval_sec, window_size=1.0, num_shards=5, pipeline_args=None):
     import argparse
     from datetime import datetime
@@ -309,31 +316,24 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
                 |  beam.ParDo(fn_check_schema()).with_outputs()
             )
 
-        errors = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
+        errors = (results["Clean"] 
+        | "Write to Big Query" >> beam.io.WriteToBigQuery(
             BIGQUERY_TABLE,
             #table_FALABELLA,
             schema=BIGQUERY_SCHEMA,
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        )
-
-
-        formated_dead_letter = errors | beam.Map(lambda x: \
-                                                                {'value':{'attr1':str(x['attr1']),'msg':str(x['msg'])},\
-                                                                'error':str(x['FailedRows']),\
-                                                                'timestamp':str(x['timestamp'])})
-
-       
-
-        ____ = formated_dead_letter | "Write to Big Query dead letter" >> beam.io.WriteToBigQuery(
+            )
+        | "Format errors" >> ParDo(FormatErrors())
+        | "Write to Big Query dead letter" >> beam.io.WriteToBigQuery(
             "x-oxygen-360101:medium.medium_test",
             #table_FALABELLA,
             schema="value:STRING,error:STRING,timestamp:STRING",
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        )
+        ))
     
 
 if __name__ == "__main__":
