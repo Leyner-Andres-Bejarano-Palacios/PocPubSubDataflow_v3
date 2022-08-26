@@ -316,24 +316,26 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
                 |  beam.ParDo(fn_check_schema()).with_outputs()
             )
 
-        errors = (beam.Create([results['validationsDetected']])
-        | "Write to Big Query" >> beam.io.WriteToBigQuery(
+
+        bq_write = results["validationsDetected"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
             BIGQUERY_TABLE,
             #table_FALABELLA,
             schema=BIGQUERY_SCHEMA,
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-            )
-        | "Format errors" >> ParDo(FormatErrors())
-        | "Write to Big Query dead letter" >> beam.io.WriteToBigQuery(
+        )
+
+        formated = bq_write | ParDo(FormatErrors())
+
+        bq_write = formated | "Write to Big Query" >> beam.io.WriteToBigQuery(
             "x-oxygen-360101:medium.medium_test",
             #table_FALABELLA,
             schema="value:STRING,error:STRING,timestamp:STRING",
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        ))
+        )
     
 
 if __name__ == "__main__":
