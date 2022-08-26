@@ -326,7 +326,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
         )
 
-        formated = bq_write | ParDo(FormatErrors())
+        formated = beam.Create([results["Clean"]]) | ParDo(FormatErrors())
 
         bq_write = formated | "Write to Big Query" >> beam.io.WriteToBigQuery(
             "x-oxygen-360101:medium.medium_test",
