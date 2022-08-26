@@ -316,7 +316,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
                 |  beam.ParDo(fn_check_schema()).with_outputs()
             )
 
-        errors = (results["Clean"] 
+        errors = (beam.Create(results["Clean"])
         | "Write to Big Query" >> beam.io.WriteToBigQuery(
             BIGQUERY_TABLE,
             #table_FALABELLA,
@@ -333,7 +333,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        ))
+        )
     
 
 if __name__ == "__main__":
