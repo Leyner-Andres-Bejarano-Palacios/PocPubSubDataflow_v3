@@ -333,7 +333,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        )
+        ))
     
 
 if __name__ == "__main__":
