@@ -25,6 +25,14 @@ import fastavro
 from apache_beam.io import WriteToAvro
 import apache_beam.transforms.window as window
 
+
+
+
+
+
+
+
+
 BIGQUERY_SCHEMA = "attr1:FLOAT,msg:STRING"
 
 class fn_check_schema(beam.DoFn):
@@ -57,7 +65,7 @@ class fn_check_schema(beam.DoFn):
         import apache_beam.transforms.window as window
         parsed = json.loads(element.decode("utf-8"))
         correct = False
-        if "attr40" in parsed and \
+        if "attr1" in parsed and \
            "msg" in parsed:
             correct = True
 
@@ -301,15 +309,31 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
                 |  beam.ParDo(fn_check_schema()).with_outputs()
             )
 
-        bq_write = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
+        errors = results["Clean"] | "Write to Big Query" >> beam.io.WriteToBigQuery(
             BIGQUERY_TABLE,
             #table_FALABELLA,
             schema=BIGQUERY_SCHEMA,
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
             #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
             #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
-        )        
+        )
 
+
+        formated_dead_letter = errors | beam.Map(lambda x: \
+                                                                {'value':{'attr1':str(x['attr1']),'msg':str(x['msg'])},\
+                                                                'error':str(x['FailedRows']),\
+                                                                'timestamp':str(x['timestamp'])})
+
+       
+
+        ____ = formated_dead_letter | "Write to Big Query dead letter" >> beam.io.WriteToBigQuery(
+            "x-oxygen-360101:medium.medium_test",
+            #table_FALABELLA,
+            schema="value:STRING,error:STRING,timestamp:STRING",
+            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+            #create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED
+            #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
+        )
     
 
 if __name__ == "__main__":
