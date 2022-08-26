@@ -316,7 +316,7 @@ def run(input_subscription, output_path, output_table, window_interval_sec, wind
                 |  beam.ParDo(fn_check_schema()).with_outputs()
             )
 
-        errors = (beam.Create([results["Clean"]])
+        errors = (beam.Create([results['validationsDetected']])
         | "Write to Big Query" >> beam.io.WriteToBigQuery(
             BIGQUERY_TABLE,
             #table_FALABELLA,
